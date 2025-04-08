@@ -10,11 +10,12 @@ public class Plot {
         this.width = 1;
     }
 
-    public Plot(int depth, int width, int x, int y) {
-        this.depth = depth;
-        this.width = width;
+    public Plot(int x, int y, int width, int depth) {
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.depth = depth;
+
     }
 
     public Plot(Plot otherPlot){
@@ -61,9 +62,39 @@ public class Plot {
         return  x + ", " +  y + ", " + width + ", " + depth;
     }
 
+      /*
+        ✅ Ý tưởng:
+        Hai Plot không giao nhau nếu một trong các điều kiện sau đúng:
 
+        Một plot nằm hoàn toàn bên trái plot kia.
+
+        Một plot nằm hoàn toàn bên phải plot kia.
+
+        Một plot nằm hoàn toàn phía trên plot kia.
+
+        Một plot nằm hoàn toàn phía dưới plot kia.
+
+        Khi không rơi vào các trường hợp này, thì hai plot có giao nhau.
+
+        2 hình: trùng nhau, giao nhau , nằm trong nhau, không giao nhau
+        => this: green
+        => plot: tím
+    */
+
+    public boolean overlaps(Plot plot){
+        return this.x + this.width >= plot.x && this.y + this.depth >= plot.y && this.x + this.width <= plot.x && this.y + this.depth <= plot.y;
+
+    }
+
+    // plot => con
+    // this => cha
+    public boolean encompasses(Plot plot){
+        return this.x > plot.x && this.y > plot.y && this.x + this.width > plot.x + plot.width && this.y + this.depth > plot.y + plot.depth;
+
+    }
     /*
    overlaps, encompasses
+   public boolean overlaps
 
      */
 }
