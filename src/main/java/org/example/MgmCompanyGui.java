@@ -29,7 +29,20 @@ import javafx.stage.Stage;
  *
  * @author Farnaz Eivazi
  * @version 7/11/2022 *
+/*
+ * Class: CMSC203
+ * Instructor:
+ * Description: (Give a brief description for each Class)
+ * Due: MM/DD/YYYY
+ * Platform/compiler:
+ * I pledge that I have completed the programming
+ * assignment independently. I have not copied the code
+ * from a student or any source. I have not given my code
+ * to any student.
+Print your Name here: __________
  */
+
+
 
 public class MgmCompanyGui extends Application {
 
