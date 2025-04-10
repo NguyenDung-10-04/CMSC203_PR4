@@ -88,13 +88,10 @@ public class Plot {
 
     // plot => con
     // this => cha
-    public boolean encompasses(Plot plot){
-        return this.x > plot.x && this.y > plot.y && this.x + this.width > plot.x + plot.width && this.y + this.depth > plot.y + plot.depth;
-
+    public boolean encompasses(Plot p) {
+        return p.x >= this.x
+                && p.y >= this.y
+                && p.x + p.width  <= this.x + this.width
+                && p.y + p.depth  <= this.y + this.depth;
     }
-    /*
-   overlaps, encompasses
-   public boolean overlaps
-
-     */
 }

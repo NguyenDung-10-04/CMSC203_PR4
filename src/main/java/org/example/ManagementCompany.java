@@ -20,7 +20,7 @@ public class ManagementCompany {
         this.mgmFee = 0.0;
         this.properties = new ArrayList<>();
         // default Plot with maximum width and depth
-        this.plot = new Plot(MGMT_DEPTH,MGMT_WIDTH,0,0);
+        this.plot = new Plot(0,0,MGMT_WIDTH,MGMT_DEPTH );
     }
 
     public ManagementCompany(String name, String taxId, double mgmFee) {
@@ -28,7 +28,7 @@ public class ManagementCompany {
         this.taxId = taxId;
         this.mgmFee = mgmFee;
         this.properties = new ArrayList<>();
-        this.plot = new Plot(MGMT_DEPTH,MGMT_WIDTH,0,0);
+        this.plot = new Plot(0,0,MGMT_WIDTH,MGMT_DEPTH);
     }
 
     public ManagementCompany(String name, String taxId, double mgmFee, int x, int y, int width, int depth) {
@@ -36,7 +36,7 @@ public class ManagementCompany {
         this.taxId = taxId;
         this.mgmFee = mgmFee;
         this.properties = new ArrayList<>();
-        this.plot = new Plot(depth,width,x,y);
+        this.plot = new Plot(x,y,width,depth);
     }
 
     public ManagementCompany(ManagementCompany otherCompany){
@@ -81,13 +81,13 @@ public class ManagementCompany {
     }
 
     // getTotalRent(): Returns the total rent of the properties in the properties array
-        public double getTotalRent(){
+    public double getTotalRent(){
         double sum = 0;
         for (Property p : properties){
             sum += p.getRentAmount();
         }
         return sum;
-        }
+    }
     /*
 
 int: addProperty(String name, String city, double rent, String owner)
@@ -101,7 +101,7 @@ Creates a property object by copying from another property and adds it to the pr
      */
 
     public int addProperty(String name, String city, double rent, String owner){
-      // ArrayList<Property> property = new ArrayList<>();
+        // ArrayList<Property> property = new ArrayList<>();
         // properties : 5 phần tử
         // 10 phần tử (
         // add 1 cái mới: không cần phải cho vào vòng for
@@ -111,8 +111,8 @@ Creates a property object by copying from another property and adds it to the pr
     }
 
     public int addProperty(String name, String city, double rent, String owner, int x, int y, int width, int depth) {
-      Property p = new Property(city,owner,name,rent,x,y,width,depth);
-           properties.add(p);
+        Property p = new Property(city,owner,name,rent,x,y,width,depth);
+        properties.add(p);
         return 0;
     }
     /*
@@ -139,20 +139,23 @@ o	-4 iIf the plot for the property overlaps any other property’s plot, it will
             return -2;
         else if(!this.plot.encompasses(property.getPlot()))
             return -3;
-        else if(!this.plot.overlaps(property.getPlot()))
-            return -4;
+        for (Property existing : properties) {
+            if (existing.getPlot().overlaps(property.getPlot())) {
+                return -4;
+            }
+        }
         properties.add(property); // 4
         // int:
         return properties.size() - 1 ;
     }
 
-  public void removeLastProperty(){
+    public void removeLastProperty(){
         for (Property p : properties){
             if(p != null){
                 properties.remove(properties.size()-1);
             }
         }
-       }
+    }
 
     /*7.	Method isPropertiesFull - Checks if the properties array has reached the maximum capacity
      */
@@ -161,20 +164,20 @@ o	-4 iIf the plot for the property overlaps any other property’s plot, it will
             if (p == null)
                 return false;
         }
-            return true;
+        return true;
     }
 
     public boolean isManagementFeeValid(){
         return mgmFee >= 0 && mgmFee <= 100;
     }
     public int getPropertiesCount(){
-            int count = 0;
-            for(Property p : properties){
-                if(p != null) {
-                    count++;
-                }
+        int count = 0;
+        for(Property p : properties){
+            if(p != null) {
+                count++;
             }
-            return count;
+        }
+        return count;
     }
     // Note:
     public String toString() {

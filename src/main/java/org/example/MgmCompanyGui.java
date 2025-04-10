@@ -1,6 +1,8 @@
 package org.example;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -223,10 +225,10 @@ public class MgmCompanyGui extends Application {
 
     private String displayHighetstRentPropertyInfo() {
         Property highestRentProperty = mgmCompany.getHighestRentProperty();
-        String value = "Property Name: " + highestRentProperty.getPropertyName() +
+        if (highestRentProperty == null) return "No properties have been added yet.";
+        return "Property Name: " + highestRentProperty.getPropertyName() +
                 "\n Located in " + highestRentProperty.getCity() + "\n Belonging to: " + highestRentProperty.getOwner()
                 + "\n Rent Amount: " + highestRentProperty.getRentAmount();
-        return value;
     }
 
     /**
@@ -252,17 +254,18 @@ public class MgmCompanyGui extends Application {
     }
 
     // draw proposed plot rectangle
-    private void drawPropertyPlot(Rectangle propRectangle, Property property) {
+    private Rectangle  drawPropertyPlot(Property property) {
         int rectW = Math.min(400, property.getPlot().getWidth() * SCALE_FACTOR);
         int rectD = Math.min(400, property.getPlot().getDepth() * SCALE_FACTOR);
         int rectX = Math.min(400, property.getPlot().getX() * SCALE_FACTOR);
         int rectY = Math.min(400, property.getPlot().getY() * SCALE_FACTOR);
-        propRectangle = new Rectangle(rectX, rectY, rectW, rectD);
-        propRectangle.setFill(Color.TRANSPARENT);
-        propRectangle.setStroke(Color.RED);
-        propRectangle.setStrokeWidth(2);
-        plotFrame.getChildren().addAll(propRectangle);
+        Rectangle rect = new Rectangle(rectX, rectY, rectW, rectD);
+        rect.setFill(Color.TRANSPARENT);
+        rect.setStroke(Color.RED);
+        rect.setStrokeWidth(2);
+        plotFrame.getChildren().add(rect);
         displayAlertBox("Note the property's Plot location\n");
+        return rect;
     }
 
     private void displayAlertBox(String text) {
@@ -279,56 +282,74 @@ public class MgmCompanyGui extends Application {
      * displayed.
      */
     private void addProp() {
-        if (!isPropertyFieldEmpty()) {
-            Property property = null;
-            if (isPropertyPlotFieldEmpty()) {
-                property = buildPropertyWithDefaultPlot();
-            } else {
-                property = buildPropertyWithGivenPlot();
-            }
+        // 1. Nếu bất kỳ trường property nào còn trống -> báo lỗi và dừng
+        if (isPropertyFieldEmpty()) {
+            displayAlertBox("Please fill in all property fields:\n"
+                    + "- Property Name\n"
+                    + "- City\n"
+                    + "- Rent\n"
+                    + "- Owner");
+            return;
+        }
 
-            Rectangle propRectangle = null;
-            drawPropertyPlot(propRectangle, property);
+        // 2. Xây dựng đối tượng Property (với default plot nếu bạn không điền X/Y/Width/Depth)
+        Property property;
+        if (isPropertyPlotFieldEmpty()) {
+            property = buildPropertyWithDefaultPlot();
+        } else {
+            property = buildPropertyWithGivenPlot();
+        }
 
-            int rtnValue = mgmCompany.addProperty(property);
-            switch (rtnValue) {
-                case -1: {
-                    alertPropertiesArrayFull();
-                    plotFrame.getChildren().remove(propRectangle);
-                    break;
-                }
-                case -2: {
-                    alertPropertyIsNull(property);
-                    plotFrame.getChildren().remove(propRectangle);
-                    break;
-                }
-                case -3: {
-                    alertDoesNotEncompass(property);
-                    plotFrame.getChildren().remove(propRectangle);
-                    break;
-                }
-                case -4: {
-                    alertOverlap(property);
-                    plotFrame.getChildren().remove(propRectangle);
-                    break;
-                }
-                default: // the case where property is valid and created - now display icon
-                    ArrayList<String> pixList = shufflePix();
-                    ImageView icon;
-                    int nextPix = 0;
-                    icon = new ImageView(pixList.get(nextPix++));
-                    icon.setX(property.getPlot().getX() * SCALE_FACTOR);
-                    icon.setY(property.getPlot().getY() * SCALE_FACTOR);
-                    double propWidth = Math.min(400, property.getPlot().getWidth() * SCALE_FACTOR);
-                    double propDepth = Math.min(400, property.getPlot().getDepth() * SCALE_FACTOR);
-                    icon.setFitWidth(propWidth);
-                    icon.setFitHeight(propDepth);
-                    icon.setSmooth(true);
-                    plotFrame.getChildren().addAll(icon);
+        // 3. Vẽ khung plot và nhận về Rectangle để có thể remove nếu lỗi
+        Rectangle propRectangle = drawPropertyPlot(property);
+// ==== CHÈN DEBUG Ở ĐÂY ====
+        Plot mPlot = mgmCompany.getPlot();
+        Plot pPlot = property.getPlot();
+        System.out.printf(
+                """
+                        MgmtPlot: x=%d,y=%d,w=%d,d=%d
+                        PropPlot: x=%d,y=%d,w=%d,d=%d
+                        encompasses? %b
+                        """,
+                mPlot.getX(), mPlot.getY(), mPlot.getWidth(), mPlot.getDepth(),
+                pPlot.getX(), pPlot.getY(), pPlot.getWidth(), pPlot.getDepth(),
+                mPlot.encompasses(pPlot)
+        );
+        // =============================
+        // 4. Thử add vào ManagementCompany
+        int rtnValue = mgmCompany.addProperty(property);
+        switch (rtnValue) {
+            case -1:
+                alertPropertiesArrayFull();
+                plotFrame.getChildren().remove(propRectangle);
+                break;
+            case -2:
+                alertPropertyIsNull(property);
+                plotFrame.getChildren().remove(propRectangle);
+                break;
+            case -3:
+                alertDoesNotEncompass(property);
+                plotFrame.getChildren().remove(propRectangle);
+                break;
+            case -4:
+                alertOverlap(property);
+                plotFrame.getChildren().remove(propRectangle);
+                break;
+            default:
+                // Thành công, vẽ icon và thông báo
+                ArrayList<String> pixList = shufflePix();
+                ImageView icon = new ImageView(pixList.get(0));
+                icon.setX(property.getPlot().getX() * SCALE_FACTOR);
+                icon.setY(property.getPlot().getY() * SCALE_FACTOR);
+                double propWidth = Math.min(400, property.getPlot().getWidth() * SCALE_FACTOR);
+                double propDepth = Math.min(400, property.getPlot().getDepth() * SCALE_FACTOR);
+                icon.setFitWidth(propWidth);
+                icon.setFitHeight(propDepth);
+                icon.setSmooth(true);
+                plotFrame.getChildren().add(icon);
 
-                    displayAlertBox("Property " + property.getPropertyName() + " was added\n");
-                    break;
-            }
+                displayAlertBox("Property " + property.getPropertyName() + " was added");
+                break;
         }
     }
 
@@ -337,8 +358,14 @@ public class MgmCompanyGui extends Application {
                 "HighRiseApts.jpg", "MiniMart.jpg", "NM_House.jpg", "OfficeBldg.jpg", "Orchard.jpg", "Patio.jpg",
                 "Pool.jpg", "School.jpg", "Shop.jpg", "TennisCourt.jpg" };
         ArrayList<String> rtnList = new ArrayList<>();
-        for (int i = 0; i < NUM_PIX; i++) {
-            rtnList.add("file:src\\images\\" + pix[i]);
+        for (String name : pix) {
+            // Dùng File để tạo URL, tránh NPE
+            File imgFile = new File("images/" + name);
+            if (!imgFile.exists()) {
+                System.err.println("Image not found: " + imgFile.getAbsolutePath());
+                continue;
+            }
+            rtnList.add(imgFile.toURI().toString());
         }
         Collections.shuffle(rtnList);
         return rtnList;
@@ -365,7 +392,7 @@ public class MgmCompanyGui extends Application {
 
     private Property buildPropertyWithDefaultPlot() {
         return new Property(propNameText.getText(), propCityText.getText(),propOwnerText.getText(), Double.parseDouble(propRentText.getText())
-                );
+        );
     }
 
     private Property buildPropertyWithGivenPlot() {
@@ -380,7 +407,7 @@ public class MgmCompanyGui extends Application {
             displayAlertBox("Plot location textfields are not integers\n");
             System.out.println("NumberFormatException in property Plot Fields");
             p = new Property(propNameText.getText(), propCityText.getText(), propOwnerText.getText(), Double.parseDouble("1000.0")
-                    );
+            );
         }
 
         return p;
