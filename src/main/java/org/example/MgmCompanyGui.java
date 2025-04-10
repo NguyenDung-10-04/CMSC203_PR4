@@ -31,15 +31,15 @@ import javafx.stage.Stage;
  * @version 7/11/2022 *
 /*
  * Class: CMSC203
- * Instructor:
- * Description: (Give a brief description for each Class)
- * Due: MM/DD/YYYY
- * Platform/compiler:
+ * Instructor: Ahmed Tarek
+ * Description: (Give a brief description for each Class) COMPANY MANAGEMENT
+ * Due: 4/6/25
+ * Platform/compiler: Intelij
  * I pledge that I have completed the programming
  * assignment independently. I have not copied the code
  * from a student or any source. I have not given my code
  * to any student.
-Print your Name here: __________
+Print your Name here: Dung Nguyen
  */
 
 
